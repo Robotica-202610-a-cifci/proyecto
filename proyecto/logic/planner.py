@@ -13,8 +13,8 @@ import math
 import heapq
 
 CELL_SIZE = 0.25   # metros por celda
-ROBOT_RADIO = 0.15  # metros (mitad del lado del robot 0.30 m)
-MARGEN_SEMI = 0.05  # metros extra para semi-libre (5 cm)
+ROBOT_RADIO = 0.20  # metros (expansion conservadora para ejecucion real)
+MARGEN_SEMI = 0.10  # metros extra para semi-libre
 
 
 # ---------------------------------------------------------------------------
@@ -140,8 +140,8 @@ def _astar(grid, cols, rows, start, goal):
             if (nc, nr) in closed_set:
                 continue
 
-            # Penalizar semi-libre ligeramente
-            extra = 2.0 if grid[nc][nr] == 1 else 1.0
+            # Penalizar semi-libre fuertemente para alejarse de paredes
+            extra = 5.0 if grid[nc][nr] == 1 else 1.0
             paso = math.sqrt(dc ** 2 + dr ** 2) * extra
             ng = g + paso
 
