@@ -70,7 +70,7 @@ class PathExecutor:
 
             # El robot ya está alineado con el waypoint: avanzar recto (dist_x=dist, dist_y=0)
             estado = node.mover_relativo(self._translate_dist, 0.0,
-                                         dist_segura=0.18, vel_lineal=0.3)
+                                         cono_vision=10, dist_segura=0.10, vel_lineal=0.3)
             if estado == 'COMPLETADO':
                 self._translate_dist = None
                 self._advance()

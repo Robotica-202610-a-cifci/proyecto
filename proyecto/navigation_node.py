@@ -155,6 +155,10 @@ class NavigationNode(Node):
         directorio_actual = os.path.dirname(os.path.abspath(__file__))
         ruta_archivo = os.path.join(
             directorio_actual, '..', 'data', f'Escena-Problema{numero_escena}.txt')
+        if not os.path.exists(ruta_archivo):
+            from ament_index_python.packages import get_package_share_directory
+            pkg_dir = get_package_share_directory('proyecto')
+            ruta_archivo = os.path.join(pkg_dir, 'data', f'Escena-Problema{numero_escena}.txt')
         try:
             with open(ruta_archivo, 'r', encoding='utf-8') as archivo:
                 self.texto_escena = archivo.read()
@@ -194,9 +198,8 @@ class NavigationNode(Node):
 
         # Guardar camino en archivo .txt
         directorio_actual = os.path.dirname(os.path.abspath(__file__))
-        self._ruta_camino_txt = os.path.join(
-            directorio_actual, '..', 'data',
-            f'camino_escena{numero_escena}.txt')
+        self._ruta_camino_txt = os.path.expanduser(
+            f'~/camino_escena{numero_escena}.txt')
         guardar_camino(self._ruta_camino_txt, waypoints)
         print(f"[AUTO] Camino guardado en: {self._ruta_camino_txt}")
         print(f"[AUTO] {len(waypoints)} waypoints planificados.")
