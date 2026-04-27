@@ -37,7 +37,7 @@ class PathExecutor:
             node.cmd_pub.publish(cmd)
             return 'EN_RUTA'
 
-        # ---- TRASLACION con correccion de rumbo ----
+        # ---- TRASLACION recta (sin correccion lateral) ----
         if self.phase == self._TRANSLATE:
             dx = tx - current_x
             dy = ty - current_y
@@ -48,14 +48,10 @@ class PathExecutor:
                 self._advance()
                 return 'EN_RUTA'
 
-            # Correccion de rumbo dinamica hacia el waypoint
-            angulo_objetivo = math.atan2(dy, dx)
-            error_ang = math.atan2(math.sin(angulo_objetivo - current_theta_rad),
-                                   math.cos(angulo_objetivo - current_theta_rad))
             vel = max(0.06, min(VEL_LINEAL, 0.4 * dist))
             cmd = Twist()
             cmd.linear.x = vel
-            cmd.angular.z = max(-0.3, min(0.3, 1.0 * error_ang))
+            cmd.angular.z = 0.0
             node.cmd_pub.publish(cmd)
             return 'EN_RUTA'
 
