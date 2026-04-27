@@ -164,11 +164,15 @@ def _angulo_entre(c1, r1, c2, r2):
     return math.degrees(math.atan2(dy, dx))
 
 
+MAX_SEG_CELDAS = 4  # maximo celdas por segmento recto (~1.0 m)
+
+
 def _simplificar_camino(path_cells):
-    """Elimina puntos colineales consecutivos."""
+    """Elimina puntos colineales consecutivos y limita segmentos a MAX_SEG_CELDAS."""
     if len(path_cells) <= 2:
         return path_cells
-    resultado = [path_cells[0]]
+    # Eliminar colineales
+    result = [path_cells[0]]
     for i in range(1, len(path_cells) - 1):
         c0, r0 = path_cells[i - 1]
         c1, r1 = path_cells[i]
@@ -176,9 +180,24 @@ def _simplificar_camino(path_cells):
         dir1 = math.atan2(r1 - r0, c1 - c0)
         dir2 = math.atan2(r2 - r1, c2 - c1)
         if abs(math.atan2(math.sin(dir2 - dir1), math.cos(dir2 - dir1))) > 0.01:
-            resultado.append(path_cells[i])
-    resultado.append(path_cells[-1])
-    return resultado
+            result.append(path_cells[i])
+    result.append(path_cells[-1])
+
+    # Partir segmentos largos en trozos de MAX_SEG_CELDAS
+    final = [result[0]]
+    for i in range(1, len(result)):
+        c0, r0 = result[i - 1]
+        c1, r1 = result[i]
+        dist = math.sqrt((c1 - c0) ** 2 + (r1 - r0) ** 2)
+        if dist > MAX_SEG_CELDAS:
+            partes = math.ceil(dist / MAX_SEG_CELDAS)
+            for k in range(1, partes):
+                t = k / partes
+                ci = round(c0 + t * (c1 - c0))
+                ri = round(r0 + t * (r1 - r0))
+                final.append((ci, ri))
+        final.append((c1, r1))
+    return final
 
 
 def planificar(escena):
