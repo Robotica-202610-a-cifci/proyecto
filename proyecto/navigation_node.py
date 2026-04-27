@@ -216,10 +216,12 @@ class NavigationNode(Node):
 
     def _finalizar_autonomo(self):
         """Relocalizacion y reporte al terminar el camino."""
+        self.cmd_pub.publish(Twist())  # detener inmediatamente
         self._fase_auto = 'RELOCALIZANDO'
-        self._reloc_espera = 20  # esperar 2 s para que el robot pare
+        self._reloc_espera = 30  # esperar 3 s parado antes de leer LiDAR
 
     def _ejecutar_relocalizacion(self):
+        self.cmd_pub.publish(Twist())  # mantener detenido
         if self._reloc_espera > 0:
             self._reloc_espera -= 1
             return

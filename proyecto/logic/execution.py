@@ -6,6 +6,7 @@ VEL_ANGULAR = 0.5
 TOL_DIST = 0.12
 TOL_ANGLE = 0.05
 
+
 class PathExecutor:
     _ROTATE = 'ROTATE'
     _TRANSLATE = 'TRANSLATE'
@@ -23,6 +24,7 @@ class PathExecutor:
         tx, ty, ttheta_deg = self.waypoints[self.idx]
         ttheta_rad = math.radians(ttheta_deg)
 
+        # ---- ROTACION ----
         if self.phase == self._ROTATE:
             error_ang = math.atan2(math.sin(ttheta_rad - current_theta_rad),
                                    math.cos(ttheta_rad - current_theta_rad))
@@ -35,16 +37,18 @@ class PathExecutor:
             node.cmd_pub.publish(cmd)
             return 'EN_RUTA'
 
+        # ---- TRASLACION con correccion de rumbo ----
         if self.phase == self._TRANSLATE:
             dx = tx - current_x
             dy = ty - current_y
-            dist = math.sqrt(dx**2 + dy**2)
+            dist = math.sqrt(dx ** 2 + dy ** 2)
+
             if dist < TOL_DIST:
                 self._detener(node)
                 self._advance()
                 return 'EN_RUTA'
 
-            # Correccion de rumbo: apunta dinamicamente al waypoint
+            # Correccion de rumbo dinamica hacia el waypoint
             angulo_objetivo = math.atan2(dy, dx)
             error_ang = math.atan2(math.sin(angulo_objetivo - current_theta_rad),
                                    math.cos(angulo_objetivo - current_theta_rad))
