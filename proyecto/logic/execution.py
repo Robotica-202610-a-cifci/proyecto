@@ -1,9 +1,9 @@
 import math
 from geometry_msgs.msg import Twist
 
-VEL_LINEAL = 0.22
+VEL_LINEAL = 0.20
 VEL_ANGULAR = 0.5
-TOL_DIST = 0.12
+TOL_DIST = 0.20
 TOL_ANGLE = 0.05
 
 
@@ -52,10 +52,10 @@ class PathExecutor:
             angulo_objetivo = math.atan2(dy, dx)
             error_ang = math.atan2(math.sin(angulo_objetivo - current_theta_rad),
                                    math.cos(angulo_objetivo - current_theta_rad))
-            vel = max(0.08, min(VEL_LINEAL, 0.5 * dist))
+            vel = max(0.06, min(VEL_LINEAL, 0.4 * dist))
             cmd = Twist()
             cmd.linear.x = vel
-            cmd.angular.z = max(-0.4, min(0.4, 1.8 * error_ang))
+            cmd.angular.z = max(-0.3, min(0.3, 1.0 * error_ang))
             node.cmd_pub.publish(cmd)
             return 'EN_RUTA'
 
