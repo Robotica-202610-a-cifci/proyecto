@@ -39,13 +39,15 @@ class PathExecutor:
 
         # ---- TRASLACION con correccion suave ----
         if self.phase == self._TRANSLATE:
+            # Esperar si el odom aun no inicializo (reporta 0,0 mientras target esta lejos)
+            if (abs(current_x) < 0.01 and abs(current_y) < 0.01
+                    and (abs(tx) > 0.5 or abs(ty) > 0.5)):
+                self._detener(node)
+                return 'EN_RUTA'
+
             dx = tx - current_x
             dy = ty - current_y
             dist = math.sqrt(dx ** 2 + dy ** 2)
-            node.get_logger().info(
-                f"[DBG] idx={self.idx} TRANSLATE dist={dist:.4f} "
-                f"pos=({current_x:.4f},{current_y:.4f}) "
-                f"tgt=({tx:.4f},{ty:.4f})")
 
             if dist < TOL_DIST:
                 self._detener(node)
