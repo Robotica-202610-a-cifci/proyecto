@@ -37,7 +37,7 @@ class PathExecutor:
             node.cmd_pub.publish(cmd)
             return 'EN_RUTA'
 
-        # ---- TRASLACION recta (sin correccion lateral) ----
+        # ---- TRASLACION con correccion suave ----
         if self.phase == self._TRANSLATE:
             dx = tx - current_x
             dy = ty - current_y
@@ -48,10 +48,14 @@ class PathExecutor:
                 self._advance()
                 return 'EN_RUTA'
 
+            angulo_objetivo = math.atan2(dy, dx)
+            error_ang = math.atan2(math.sin(angulo_objetivo - current_theta_rad),
+                                   math.cos(angulo_objetivo - current_theta_rad))
             vel = max(0.06, min(VEL_LINEAL, 0.4 * dist))
             cmd = Twist()
             cmd.linear.x = vel
-            cmd.angular.z = 0.0
+            # Solo corrige si el error supera 8 grados para evitar oscilacion
+            cmd.angular.z = max(-0.2, min(0.2, 0.5 * error_ang)) if abs(error_ang) > 0.14 else 0.0
             node.cmd_pub.publish(cmd)
             return 'EN_RUTA'
 
