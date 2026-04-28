@@ -13,7 +13,10 @@ class PathExecutor:
 
     def __init__(self, waypoints):
         self.waypoints = waypoints
-        self.idx = 0
+        # Empezamos en idx=1: el robot ya esta fisicamente en q0 (waypoints[0]),
+        # asi que saltamos ese waypoint redundante y vamos directo a la primera
+        # rotacion hacia el camino planificado.
+        self.idx = 1 if len(waypoints) > 1 else 0
         self.phase = self._ROTATE
 
     def tick(self, current_x, current_y, current_theta_rad, node):
@@ -39,12 +42,6 @@ class PathExecutor:
 
         # ---- TRASLACION con correccion suave ----
         if self.phase == self._TRANSLATE:
-            # Esperar si el odom aun no inicializo (reporta 0,0 mientras target esta lejos)
-            if (abs(current_x) < 0.01 and abs(current_y) < 0.01
-                    and (abs(tx) > 0.5 or abs(ty) > 0.5)):
-                self._detener(node)
-                return 'EN_RUTA'
-
             dx = tx - current_x
             dy = ty - current_y
             dist = math.sqrt(dx ** 2 + dy ** 2)
