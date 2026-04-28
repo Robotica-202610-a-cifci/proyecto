@@ -31,6 +31,7 @@ class NavigationNode(Node):
         self.current_y = 0.0
         self.current_theta = 0.0
         self.last_scan = None
+        self._odom_listo = False   # True tras recibir el primer mensaje de odom
 
         # Memoria para movimientos relativos
         self.target_theta_relativo = None
@@ -68,6 +69,7 @@ class NavigationNode(Node):
         qz = msg.pose.pose.orientation.z
         qw = msg.pose.pose.orientation.w
         self.current_theta = 2.0 * math.atan2(qz, qw)
+        self._odom_listo = True
 
     def lidar_callback(self, msg):
         self.last_scan = msg
@@ -355,8 +357,10 @@ class NavigationNode(Node):
     # BUCLE PRINCIPAL DE CONTROL (10 Hz)
     # =======================================================
     def control_loop(self):
-        # ---- Modo autónomo: ejecutar camino NO necesita LiDAR ----
+        # ---- Modo autónomo: ejecutar camino solo necesita odom (no LiDAR) ----
         if self._fase_auto == 'EJECUTANDO':
+            if not self._odom_listo:   # esperar primer mensaje de odom
+                return
             if self._executor is None or self._executor.terminado:
                 self.get_logger().info("Camino completado. Iniciando relocalización.")
                 self._finalizar_autonomo()
