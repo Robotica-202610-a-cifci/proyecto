@@ -3,8 +3,9 @@ from geometry_msgs.msg import Twist
 
 VEL_LINEAL = 0.20
 VEL_ANGULAR = 0.5
+VEL_ANGULAR_MIN = 0.18   # minimo para vencer friccion estatica del mecanum
 TOL_DIST = 0.20
-TOL_ANGLE = 0.05
+TOL_ANGLE = 0.10         # ~6 grados, suficiente para navegacion real
 
 
 class PathExecutor:
@@ -35,8 +36,12 @@ class PathExecutor:
                 self._detener(node)
                 self.phase = self._TRANSLATE
                 return 'EN_RUTA'
+            # Velocidad proporcional con minimo para vencer friccion estatica
+            w = 2.0 * error_ang
+            if abs(w) < VEL_ANGULAR_MIN:
+                w = math.copysign(VEL_ANGULAR_MIN, error_ang)
             cmd = Twist()
-            cmd.angular.z = max(-VEL_ANGULAR, min(VEL_ANGULAR, 2.0 * error_ang))
+            cmd.angular.z = max(-VEL_ANGULAR, min(VEL_ANGULAR, w))
             node.cmd_pub.publish(cmd)
             return 'EN_RUTA'
 
