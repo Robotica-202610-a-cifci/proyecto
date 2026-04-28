@@ -13,7 +13,7 @@ import math
 import heapq
 
 CELL_SIZE = 0.25   # metros por celda
-ROBOT_RADIO = 0.20  # metros (expansion conservadora para ejecucion real)
+ROBOT_RADIO = 0.28  # metros (margen extra para evitar roces en simulacion)
 MARGEN_SEMI = 0.10  # metros extra para semi-libre
 
 

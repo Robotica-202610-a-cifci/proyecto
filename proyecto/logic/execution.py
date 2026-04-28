@@ -11,17 +11,8 @@ class PathExecutor:
     _ROTATE = 'ROTATE'
     _TRANSLATE = 'TRANSLATE'
 
-    def __init__(self, waypoints, theta_offset=0.0):
-        """
-        waypoints    : lista de (x, y, theta_grados) en frame mundo
-        theta_offset : yaw del spawn en radianes (= math.radians(q0[2])).
-                       El plugin de odom de Gazebo inicializa theta=0
-                       independientemente del yaw de spawn, por lo que hay
-                       que restar este offset para pasar del frame mundo al
-                       frame odom donde mide el sensor.
-        """
+    def __init__(self, waypoints):
         self.waypoints = waypoints
-        self.theta_offset = theta_offset
         # Empezamos en idx=1: el robot ya esta fisicamente en q0 (waypoints[0]),
         # asi que saltamos ese waypoint redundante y vamos directo a la primera
         # rotacion hacia el camino planificado.
@@ -34,8 +25,7 @@ class PathExecutor:
             return 'COMPLETADO'
 
         tx, ty, ttheta_deg = self.waypoints[self.idx]
-        # Convertir theta del frame mundo al frame odom restando el offset de spawn
-        ttheta_rad = math.radians(ttheta_deg) - self.theta_offset
+        ttheta_rad = math.radians(ttheta_deg)
 
         # ---- ROTACION ----
         if self.phase == self._ROTATE:
@@ -61,8 +51,7 @@ class PathExecutor:
                 self._advance()
                 return 'EN_RUTA'
 
-            # angulo_objetivo tambien en frame odom (restar offset de spawn)
-            angulo_objetivo = math.atan2(dy, dx) - self.theta_offset
+            angulo_objetivo = math.atan2(dy, dx)
             error_ang = math.atan2(math.sin(angulo_objetivo - current_theta_rad),
                                    math.cos(angulo_objetivo - current_theta_rad))
             vel = max(0.06, min(VEL_LINEAL, 0.4 * dist))
