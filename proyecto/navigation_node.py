@@ -209,8 +209,12 @@ class NavigationNode(Node):
         for i, (x, y, th) in enumerate(waypoints):
             print(f"  [{i:2d}] x={x:.3f}  y={y:.3f}  θ={th:.1f}°")
 
-        # Iniciar ejecucion
-        self._executor = PathExecutor(waypoints)
+        # Iniciar ejecucion.
+        # El plugin de odom de Gazebo inicializa theta=0 independientemente del
+        # yaw de spawn definido en el SDF. Pasamos el yaw de spawn (q0[2]) como
+        # offset para que el executor trabaje en el frame del odom.
+        spawn_theta_rad = math.radians(self.escena_data['q0'][2])
+        self._executor = PathExecutor(waypoints, theta_offset=spawn_theta_rad)
         self._fase_auto = 'EJECUTANDO'
         print("\n[AUTO] Iniciando ejecución...\n")
 
@@ -439,7 +443,9 @@ class NavigationNode(Node):
                     return
                 self._waypoints_plan = waypoints
                 self._ruta_camino_txt = ruta
-                self._executor = PathExecutor(waypoints)
+                spawn_theta_rad = math.radians(
+                    self.escena_data['q0'][2]) if self.escena_data else 0.0
+                self._executor = PathExecutor(waypoints, theta_offset=spawn_theta_rad)
                 self._fase_auto = 'EJECUTANDO'
                 print(f"[AUTO] {len(waypoints)} waypoints cargados. Ejecutando...")
             except Exception as e:
