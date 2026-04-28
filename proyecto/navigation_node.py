@@ -355,10 +355,7 @@ class NavigationNode(Node):
     # BUCLE PRINCIPAL DE CONTROL (10 Hz)
     # =======================================================
     def control_loop(self):
-        if self.last_scan is None:
-            return
-
-        # ---- Modo autónomo en curso ----
+        # ---- Modo autónomo: ejecutar camino NO necesita LiDAR ----
         if self._fase_auto == 'EJECUTANDO':
             if self._executor is None or self._executor.terminado:
                 self.get_logger().info("Camino completado. Iniciando relocalización.")
@@ -379,6 +376,10 @@ class NavigationNode(Node):
                 if self._executor.idx % 2 == 0:
                     self.get_logger().info(
                         f"Progreso: waypoint {self._executor.progreso}")
+            return
+
+        # ---- Relocalización y comandos manuales SÍ necesitan LiDAR ----
+        if self.last_scan is None:
             return
 
         if self._fase_auto == 'RELOCALIZANDO':
